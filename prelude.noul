@@ -1,0 +1,123 @@
+year := 2016;
+advent_session := try
+	crypt := read_file_bytes("session.crypt");
+	utf8decode(aes256_gcm_decrypt(blake3(crypt[144:]), bytes(0 .* 12), crypt[:144]))
+catch e ->
+	throw "couldn't get session: " $ e;
+try day catch _ -> throw "Please declare day first! (lol what a hack)";
+advent_input := \ ->  (
+	switch (read_file? F"p{day}.in")
+	case null -> (
+		print("requesting...");
+		t := request!
+			F"https://adventofcode.com/{year}/day/{day}/input",
+			{"headers": {"Cookie": F"session={advent_session}"}};
+		write_file(F"p{day}.in")(t);
+		print("requested");
+		t
+	)
+	case s -> (print("cached"); s)
+);
+submit := \level, answer -> (
+	print! "Solving:", answer, "Y?";
+	if (not! input().upper starts_with 'Y') (
+		print! "stopping";
+		return;
+	);
+	# TODO: logging
+	url := F"https://adventofcode.com/{year}/day/{day}/answer";
+	args :=
+		{
+			"method": "POST",
+			"headers": {"Cookie": F"session={advent_session}"},
+			"form": {"answer": answer, "level": $level},
+		};
+	# print! url, args;
+	resp := request! url, args;
+	for (line <- lines resp)
+		if ("answer" in line or "level" in line)
+			print(line)
+);
+
+ints := \s -> s search_all R"\d+" map int;
+
+struct Deque (dq_buffer, dq_front_index, dq_back_index);
+# Equal when empty. Else, "front < back" (in the modulo universe)
+# For simplicity we never completely fill the buffer. It's fine.
+
+# It's probably a bug that we don't yet have a way to define constructors, but
+# hilariously I think our functions almost coincidentally correctly accept
+# (null, null, null) as a valid empty state.
+
+dq_to_list := freeze \dq: Deque -> (
+	ret := [];
+	i := dq[dq_front_index];
+	while (i != dq[dq_back_index]) (
+		ret append= consume dq[dq_buffer][i];
+		i = (i + 1) % len(dq[dq_buffer]);
+	);
+	ret
+);
+
+dq_make_space := freeze \dq: Deque -> (
+	switch (dq[dq_buffer])
+	case null or [] -> Deque([null, null], 0, 0)
+	case _ -> if ((dq[dq_back_index] + 1) % len(dq[dq_buffer]) == dq[dq_front_index]) (
+		print("Expanding");
+		contents := dq_to_list(consume dq);
+		Deque(contents ++ (null .* (2 + len(contents))), 0, len(contents))
+	) else dq
+
+	#(
+	if (dq[dq_buffer] == null or dq[dq_buffer] == []) Deque([null, null], 0, 0)
+	else
+	if ((dq[dq_back_index] + 1) % len(dq[dq_buffer]) == dq[dq_front_index]) (
+		contents := dq_to_list(consume dq);
+		Deque(contents ++ (null .* (2 + len(contents))), 0, len(contents))
+	) else dq
+	)
+);
+
+dq_push_back := freeze \dq: Deque, e -> (
+	dq .= dq_make_space;
+	next_back := (dq[dq_back_index] + 1) % len(dq[dq_buffer]);
+	dq[dq_buffer][dq[dq_back_index]] = e;
+	dq[dq_back_index] = next_back;
+	# print("pushed", dq);
+	dq
+);
+
+dq_push_front := freeze \dq: Deque, e -> (
+	dq .= dq_make_space;
+	next_front := (dq[dq_front_index] - 1) %% len(dq[dq_buffer]);
+	dq[dq_front_index] = next_front;
+	dq[dq_buffer][dq[dq_front_index]] = e;
+	# print("pushed", dq);
+	dq
+);
+
+dq_pop_front := freeze \dq: Deque -> (
+	if (dq[dq_front_index] == dq[dq_back_index]) throw "deque empty";
+	ret := consume dq[dq_buffer][dq[dq_front_index]];
+	dq[dq_front_index] = (dq[dq_front_index] + 1) % len(dq[dq_buffer]);
+	[dq, ret]
+);
+
+dq_pop_back := freeze \dq: Deque -> (
+	if (dq[dq_front_index] == dq[dq_back_index]) throw "deque empty";
+	dq[dq_back_index] = (dq[dq_back_index] - 1) %% len(dq[dq_buffer]);
+	ret := consume dq[dq_buffer][dq[dq_back_index]];
+	[dq, ret]
+);
+
+#(
+q := Deque();
+for (e <- 1 to 1000000) (
+	print e;
+	q dq_push_front= e;
+);
+while (true) (
+	q, (e:) = dq_pop_back(consume q);
+	print e;
+)
+)
