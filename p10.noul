@@ -1,0 +1,54 @@
+day := 10;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+bots := {:[]};
+
+for (line <- lines puzzle_input) (
+	switch (words line)
+	case "value", val, "goes", "to", "bot", bot -> (bots[bot] append= int(val))
+	case "bot", bot, "gives", "low", "to", loty, lonum, "and", "high", "to", hity, hinum -> null
+	case x -> throw x
+);
+
+outs := {};
+
+while (1) (
+for (line <- lines puzzle_input) (
+	switch (words line)
+	case "value", val, "goes", "to", "bot", bot -> null
+	case "bot", bot, "gives", "low", "to", loty, lonum, "and", "high", "to", hity, hinum -> (
+		# print("giving", bot);
+		assert(len(bots[bot]) <= 2);
+		if (len(bots[bot]) == 2) (
+			lo, hi := sort(bots[bot]);
+			print("sorting", lo, hi);
+			bots[bot] = [];
+			if (lo == 17 and hi == 61) (
+				# submit! 1, bot
+				null
+			);
+			if (loty == "bot") (
+				bots[lonum] append= lo
+			) else (
+				assert(loty == "output");
+				print("lo output", lo, lonum);
+				outs[lonum] = lo;
+			);
+			if (hity == "bot") (
+				bots[hinum] append= hi
+			) else (
+				assert(loty == "output");
+				print("hi output", hi, hinum);
+				outs[hinum] = hi;
+			);
+		)
+	)
+	case x -> throw x;
+
+	if (["0", "1", "2"] all (in outs)) (
+		submit! 2, ["0", "1", "2"] map (outs!!) then product
+	)
+)
+)
+

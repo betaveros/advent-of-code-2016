@@ -1,0 +1,20 @@
+day := 12;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+instrs := lines puzzle_input;
+regfile := {:0};
+regfile["c"] = 1;
+ip := 0;
+
+val := \k -> try int(k) catch _ -> regfile[k];
+
+while (ip < len(instrs)) (
+	switch (words (instrs[ip]))
+	case "cpy", a, b -> (regfile[b] = val(a); ip += 1)
+	case "inc", a -> (regfile[a] += 1; ip += 1)
+	case "dec", a -> (regfile[a] -= 1; ip += 1)
+	case "jnz", a, b -> (if (val(a)) ip += val(b) else ip += 1)
+);
+
+submit! 2, regfile["a"]

@@ -1,0 +1,59 @@
+day := 9;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+
+decompressed := \lo, hi -> (
+	print(lo, hi);
+	ans := 0;
+	i := lo;
+	while (i < hi) (
+		print(i);
+		if (puzzle_input[i] == "(") (
+			coll := "";
+			while (puzzle_input[i] != ")") (
+				coll $= puzzle_input[i];
+				i += 1;
+			);
+			i += 1;
+			subseq, times := ints(coll);
+			assert(i + subseq <= hi);
+			ans += decompressed(i, i + subseq) * times;
+			i += subseq;
+		) else (
+			if (not(is_space(puzzle_input[i]))) (
+				ans += 1;
+			);
+			i += 1
+		)
+	);
+	ans
+);
+submit! 2, decompressed(0, len(puzzle_input))
+
+
+#(
+stack := list(reverse puzzle_input);
+# output := [];
+output := 0;
+while (stack) (
+	nxt := pop stack;
+	if (nxt == "(") (
+		coll := "";
+		nxt = pop stack;
+		while (nxt != ")") (
+			coll $= nxt;
+			nxt = pop stack;
+		);
+		subseq, times := ints(coll);
+		output += subseq * times;
+		for (_ <- 0 til subseq) pop stack;
+		# bunch := stack[-subseq:];
+		# stack ++= bunch ** (times-1);
+	) else if (not(is_space(nxt))) (
+		output += 1;
+		# output append= nxt;
+	)
+);
+submit! 1, output
+)

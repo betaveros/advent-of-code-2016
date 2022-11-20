@@ -1,0 +1,43 @@
+day := 11;
+import "prelude.noul";
+# puzzle_input := advent_input();
+
+# (chip, generator)
+# start := [0, [0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 0, 0, 0, 0]];
+start := [0, [0, 0, 0, 0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1]];
+
+legal := \[elev, gs] -> not(
+	set(gs group 2 filter (\[chip, g] -> chip != g) map first)
+	&&
+	set(gs group 2 map second));
+
+transitions := \[elev, gs] -> (
+	movable := enumerate(gs) filter (second >>> (== elev)) map first;
+	for (
+		destination <- [elev - 1, elev + 1] filter (0 <= _ <= 3);
+		moves <- list(movable combinations 1) ++ list(movable combinations 2);
+		next_state := [destination,
+		(
+			gs2 := gs;
+			for (mov <- moves) gs2[mov] = destination;
+			gs2 group 2 then sort then flatten
+		)];
+		if legal(next_state)
+	) yield next_state
+);
+
+seen := {start};
+dist := 0;
+batch := [start];
+next_batch := [];
+while (1) (
+	print(dist);
+	for (st <- batch; t <- transitions(st); if t not_in seen) (
+		if (second(t) all (== 3)) submit! 2, dist + 1;
+		seen |.= t;
+		next_batch append= t;
+	);
+	batch = next_batch;
+	next_batch = [];
+	dist += 1;
+)

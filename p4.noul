@@ -1,0 +1,21 @@
+day := 4;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+valid := puzzle_input then lines filter (\line -> (
+	# id, := ints(line);
+	left, right := line split "[";
+	right = right[:-1];
+	checksum := left filter is_alpha then frequencies then items sort (<=> on \(letter, freq) -> [-freq, letter]) then (\t -> t[:5] map first) join "";
+	print(checksum, right);
+	checksum == right
+));
+
+valid each \s -> (
+	(id,) := ints(s);
+	print(s map (\c -> if (is_alpha(c)) (
+		chr(((ord(c) - ord('a') + id) %% 26) + ord('a'))
+	) else c) join "");
+)
+
+# submit! 1, valid map (\line -> ((x,) := ints(line); x)) then sum

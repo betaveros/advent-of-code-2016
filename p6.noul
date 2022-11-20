@@ -1,0 +1,5 @@
+day := 6;
+import "prelude.noul";
+submit! 2, advent_input() then lines then transpose
+map (\column -> column then frequencies then items max (>=< on second) then first)
+join ""

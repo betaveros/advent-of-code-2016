@@ -1,0 +1,5 @@
+day := 3;
+import "prelude.noul";
+puzzle_input := advent_input();
+# submit! 1, puzzle_input then lines map ints count \sides -> sum(sides) > 2*max(sides)
+submit! 2, puzzle_input then lines map ints group 3 map transpose then flatten count \sides -> sum(sides) > 2*max(sides)

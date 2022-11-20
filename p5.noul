@@ -1,0 +1,21 @@
+day := 5;
+import "prelude.noul";
+puzzle_input := advent_input();
+puzzle_input .= strip;
+print(len(puzzle_input));
+
+# answer := "";
+answer := "_" .* 8;
+
+for (i <- iota 0) (
+	hash := hex_encode(md5(utf8encode(puzzle_input $ i)));
+	# if (hash[:5] == "00000") answer $= hash[5];
+	if (hash[:5] == "00000" and "0" <= hash[5] <= "7" and answer[int(hash[5])] == "_") (
+		answer[int(hash[5])] = hash[6];
+		print(answer);
+		if (answer all (!= "_")) submit! 2, answer join ""
+	);
+	# if (answer.len >= 8) submit! 1, answer
+);
+
+# not: 587572df

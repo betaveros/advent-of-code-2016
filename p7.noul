@@ -1,0 +1,15 @@
+day := 7;
+import "prelude.noul";
+
+# has_abba := \x -> x window 4 any \[a, b, c, d] -> a == d != b == c;
+# 
+# submit! 1, advent_input() then lines count \ip ->
+# 	has_abba(ip) and not(ip search_all R"\[[a-z]*\]" any has_abba)
+
+abas := \x -> x window 3 filter (\[a, b, c] -> a == c != b) map tail;
+
+submit! 2, advent_input() then lines count \ip -> (
+	inners := ip search_all R"\[[a-z]*\]" flat_map abas;
+	outers := ip replace R"\[[a-z]*\]" with "[]";
+	set(outers.abas map reverse) && set(inners)
+)

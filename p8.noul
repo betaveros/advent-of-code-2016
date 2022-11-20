@@ -1,0 +1,33 @@
+day := 8;
+import "prelude.noul";
+puzzle_input := advent_input();
+# puzzle_input := read_file("p8.sample");
+
+grid := 0 .* 50 .* 6;
+# grid := 0 .* 7 .* 3;
+for (line <- lines puzzle_input) (
+	switch (words line)
+	case "rect", dims -> (
+		rs, cs := ints(dims);
+		every grid[0:cs][0:rs] = 1
+	)
+	case "rotate", "row", y, "by", amt -> (
+		y, = ints(y);
+		amt = int(amt);
+		grid[y] = grid[y][-amt:] ++ grid[y][:-amt];
+	)
+	case "rotate", "column", x, "by", amt -> (
+		x, = ints(x);
+		amt = int(amt);
+		col := grid map (!!x);
+		col = col[-amt:] ++ col[:-amt];
+		for (i <- 0 til len(grid)) grid[i][x] = col[i];
+	)
+	case x -> throw x;
+	print(grid);
+);
+
+submit! 1, sum(flatten(grid));
+print(grid map (_ map (" #"!!) join "") join "\n")
+
+

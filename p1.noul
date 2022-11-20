@@ -1,0 +1,26 @@
+day := 1;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+loc := V(0, 0);
+dr, dc := -1, 0;
+
+seen := {loc};
+
+for (turn, ...s <- puzzle_input split ", ") (
+	switch (turn)
+	case "L" -> (dr, dc = dc, -dr)
+	case "R" -> (dr, dc = -dc, dr);
+	s = s join "" then strip;
+	for (_ <- 1 to int(s join "")) (
+		loc += V(dr, dc);
+		print(loc);
+		if (loc in seen) (
+			submit! 2, loc map abs then sum
+		);
+		seen |.= loc;
+	)
+	# loc += int(s join "") * V(dr, dc);
+);
+
+# submit! 1, loc map abs then sum

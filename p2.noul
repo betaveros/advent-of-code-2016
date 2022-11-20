@@ -1,0 +1,30 @@
+day := 2;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+mapping := {
+	"U": V(-1, 0),
+	"L": V(0, -1),
+	"R": V(0, 1),
+	"D": V(1, 0),
+};
+# grid := 1 to 9 map str group 3;
+# loc := V(1, 1);
+
+grid := ["..1",".234","56789",".ABC","..D"];
+loc := V(2, 2);
+
+clamp := \x -> max(0, min(2, x));
+code := "";
+for (line <- lines(puzzle_input)) (
+	for (ch <- line) (
+		nxt := loc + mapping[ch];
+		if (grid !? nxt[0] !? nxt[1] not_in [null, "."]) (
+			loc = nxt;
+		)
+	);
+	code $= grid[loc[0]][loc[1]];
+);
+
+
+submit! 2, code;

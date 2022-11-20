@@ -1,0 +1,27 @@
+day := 13;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+(designer,) := ints(puzzle_input);
+
+start := V(1, 1);
+legal := \x, y -> str_radix(x*x + 3*x + 2*x*y + y + y*y + designer, 2) map int then sum then even;
+
+transitions := \st -> for (d <- [V(1, 0), V(-1, 0), V(0, 1), V(0, -1)]; nxt := st + d; if nxt all (>= 0); if nxt apply legal) yield nxt;
+
+seen := {start};
+dist := 0;
+batch := [start];
+next_batch := [];
+for (_ <- 0 til 50) (
+	print(dist);
+	for (st <- batch; t <- transitions(st); if t not_in seen) (
+		# if (t == V(31, 39)) submit! 1, dist + 1;
+		seen |.= t;
+		next_batch append= t;
+	);
+	batch = next_batch;
+	next_batch = [];
+	dist += 1;
+);
+submit! 2, len(seen)
