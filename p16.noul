@@ -1,0 +1,59 @@
+day := 16;
+import "prelude.noul";
+puzzle_input := advent_input().strip;
+
+# dragonify := \s -> s $ "0" $ (reverse(s) map int map not join "");
+# condense := \s -> s group 2 map (apply ==) join "";
+
+atom := puzzle_input map int;
+second_half := \s -> reverse(s) map not;
+xnor := \s -> s map not fold xor then not;
+
+xnor_range := \lo, hi, tlo, thi, is_right -> (
+	# print(lo, tlo, thi, hi);
+	assert(lo <= tlo < thi <= hi);
+	assert(hi - lo >= len(puzzle_input));
+	if (hi - lo == len(puzzle_input)) (
+		arr := if (is_right) second_half(atom) else atom;
+		xnor(arr[tlo - lo:thi - lo])
+	) else if (lo == tlo and hi == thi) (
+		not is_right
+	) else (
+		mid := (lo + hi) // 2;
+		parts := [];
+		if (tlo <= mid and thi >= mid + 1)
+		parts append= is_right;
+		if (tlo < mid)
+		parts append= xnor_range(lo, mid, tlo, min(mid, thi), 0);
+		if (thi > mid + 1)
+		parts append= xnor_range(mid + 1, hi, max(tlo, mid + 1), thi, 1);
+		xnor(parts)
+	)
+);
+
+thi := 35651584;
+
+hi := len(atom);
+while (hi < thi) hi = 2*hi + 1;
+
+atom1 := atom ++ [0] ++ second_half(atom);
+
+for (i <- 1 to 30) (
+	print(xnor_range(0, hi, 0, i, 0), xnor(atom1[0:i]));
+);
+
+for (i <- 0 til 17) print(xnor_range(0, hi, i*16, (i+1)*16, 0));
+
+
+submit! 2, (for (i <- 0 til 17) yield xnor_range(0, hi, i*(2^21), (i+1)*(2^21), 0)) join "";
+
+#(
+
+st := puzzle_input;
+
+while (len(st) < 272) st .= dragonify;
+st = st[:272];
+
+while (len(st).even) st .= condense;
+submit! 1, st;
+)

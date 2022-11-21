@@ -49,6 +49,9 @@ struct Deque (dq_buffer, dq_front_index, dq_back_index);
 # hilariously I think our functions almost coincidentally correctly accept
 # (null, null, null) as a valid empty state.
 
+dq_len := freeze \dq: Deque -> if (dq_back_index(dq) == null) 0 else
+	(dq_back_index(dq) - dq_front_index(dq)) %% len(dq_buffer(dq));
+
 dq_to_list := freeze \dq: Deque -> (
 	ret := [];
 	i := dq[dq_front_index];

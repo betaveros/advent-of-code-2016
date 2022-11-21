@@ -1,0 +1,39 @@
+day := 14;
+import "prelude.noul";
+puzzle_input := advent_input().strip;
+# puzzle_input := "abc";
+
+identical := \x -> x all (== (x[0]));
+
+extra_hash := \s -> (puzzle_input $ s) iterate (hex_encode <<< md5 <<< utf8encode) then (!!2017);
+
+# hashes := 0 til 1000 map \i -> hex_encode(md5(utf8encode(puzzle_input $ i)));
+hashes := 0 til 1000 map extra_hash;
+
+c := 0;
+for (i <- iota 0) (
+	# print(i);
+	# hashes append= hex_encode(md5(utf8encode(puzzle_input $ (1000 + i))));
+	hashes append= extra_hash! (1000 + i);
+	for (w <- hashes[i] window 3) (
+		if (identical w) (
+			good := 0;
+			for (j <- (i + 1) to (i + 1000)) (
+				# print((w[0] $* 5), hashes[j]);
+				if ((w[0] $* 5) in hashes[j]) (
+					good = 1;
+					break;
+				)
+			);
+			if (good) (
+				c += 1;
+				print("c", c);
+				if (c == 64) (
+					submit! 1, i;
+					throw "done";
+				)
+			);
+			break;
+		)
+	)
+)

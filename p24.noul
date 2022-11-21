@@ -1,0 +1,32 @@
+day := 24;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+grid := lines puzzle_input;
+
+(start,) := for (i, row <- enumerate grid; j, c <- enumerate row; if grid[i][j] == "0") yield V(i, j);
+others := for (i, row <- enumerate grid; j, c <- enumerate row; if is_digit(grid[i][j]) and grid[i][j] != "0") yield V(i, j);
+
+transitions := \st -> for (d <- [V(1, 0), V(-1, 0), V(0, 1), V(0, -1)]; nxt := st + d; if grid[nxt[0]][nxt[1]] != "#") yield nxt;
+
+distance := memoize \start, goal -> (
+	seen := {start};
+	dist := 0;
+	batch := [start];
+	next_batch := [];
+	while (true) (
+		print(dist);
+		for (st <- batch; t <- transitions(st); if t not_in seen) (
+			if (t == goal) return dist + 1;
+			seen |.= t;
+			next_batch append= t;
+		);
+		batch = next_batch;
+		next_batch = [];
+		dist += 1;
+	)
+);
+
+cands := for (p <- permutations others) yield
+	(start .+ p +. start) window 2 map (apply distance) then sum;
+submit! 1, min(cands)

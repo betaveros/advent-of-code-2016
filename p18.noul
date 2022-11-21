@@ -1,0 +1,11 @@
+day := 18;
+import "prelude.noul";
+puzzle_input := advent_input().strip;
+
+transition := \s ->
+	("." $ s $ ".") window 3
+	map (\t -> if (t[0] != t[2]) "^" else ".")
+	join "";
+
+
+submit! 2, puzzle_input iterate transition take 400000 join "" count ".";

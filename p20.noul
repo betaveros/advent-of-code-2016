@@ -1,0 +1,28 @@
+day := 20;
+import "prelude.noul";
+# puzzle_input := "5-8\n0-2\n4-7";
+puzzle_input := advent_input();
+
+events := lines(puzzle_input) map ints flat_map (\(lo, hi) -> [[lo, -1], [hi + 1, 1]]) then sort;
+print(events);
+
+
+depth := 0;
+upper_bound := 4294967296;
+events append= [upper_bound, 0];
+last_coord := 0;
+ans := 0;
+for (coord, delta <- events) (
+	if (depth == 0) ans += coord - last_coord;
+	print(coord, delta);
+	depth += delta;
+	last_coord = coord;
+
+	#(
+	if (depth == 0) (
+		submit! 1, coord;
+		throw "done"
+	)
+	)
+);
+submit! 2, ans;

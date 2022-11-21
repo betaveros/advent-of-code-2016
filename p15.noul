@@ -1,0 +1,12 @@
+day := 15;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+discs := lines(puzzle_input) map ints;
+
+discs append= [7, 11, 0, 0];
+
+for (t <- iota 0) (
+	if (discs all \(i, p, _, s) -> (s + t + i) % p == 0)
+	submit! 1, t
+)

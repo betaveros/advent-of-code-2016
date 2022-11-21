@@ -1,0 +1,28 @@
+day := 22;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+nodes := (puzzle_input.lines)[2:] map ints;
+
+sizes := [];
+useds := [];
+avails := [];
+for (x, y, size, used, avail, usep <- nodes) (
+	sizes append= size;
+	useds append= used;
+	avails append= avail;
+	if (y == 0) print();
+	if (used >= 490) echo("#")
+	else if (used == 0) echo("_")
+	else echo(".");
+);
+# print(sort sizes);
+# print(sort useds);
+# print(sort avails);
+
+#(
+submit! 1, nodes ^^ 2 count \(n1, n2) ->
+n1[3] != 0 and
+n1 != n2 and
+n1[3] <= n2[4];
+)

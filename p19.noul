@@ -1,0 +1,47 @@
+day := 19;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+n := int(puzzle_input.strip);
+
+slow_transition := \s -> (
+	print(F"guy {s[0]} steals from guy {s[len(s)//2]}");
+	s[1:len(s)//2] ++ s[len(s)//2+1:] ++ [s[0]]
+);
+
+fast_transition := \s -> (
+	n := len(s);
+	survivor_mod_3 := ((if (n.even) 2 else 1) + n//2) % 3;
+	survive := (%3) >>> (== survivor_mod_3);
+	targets := (n//2) til (n-1);
+	stealers := targets count (survive >>> not);
+	s[stealers:n//2] ++ (targets filter survive map (s!!)) ++ [s[-1]] ++ s[:stealers]
+);
+
+a, b := list(1 to n) iterate fast_transition find (len >>> (== 2));
+submit! 2, a;
+
+# ft := fast_transition(list(1 to 999));
+# print(ft);
+# 
+# st := 1 to 999 then list iterate slow_transition find (len >>> (== (len(ft))));
+# print(st == ft);
+
+# 1000: 500, 501, 503... survivors = 2 + n//2 mod 3
+# 999: 499, 501, 502... survovrs = 1 + n//2 mod 3
+
+#(
+dq := Deque();
+for (i <- 1 to n) (
+	print("push", i);
+	dq dq_push_back= i;
+);
+
+while (dq_len(dq) >= 2) (
+	dq, (a:) = dq_pop_front(consume dq);
+	dq, (b:) = dq_pop_front(consume dq);
+	print("pop", a, b);
+	dq dq_push_back= a;
+);
+submit! 1, dq_pop_front(consume dq)[1];
+)

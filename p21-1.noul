@@ -1,0 +1,43 @@
+day := 21;
+import "prelude.noul";
+# puzzle_input := "5-8\n0-2\n4-7";
+puzzle_input := advent_input();
+
+
+# pw := list("abcdefgh");
+pw := list("egcdahbf"); # testing
+for (line <- lines puzzle_input) (
+	switch (words line)
+	case "swap", "position", x, _, _, y ->
+		(swap pw[int(x)], pw[int(y)])
+	case "swap", "letter", x, _, _, y -> (
+		pw map= \c -> switch (c) case literally x -> y case literally y -> x case c -> c
+	)
+	case "rotate", "left", x, _ -> (
+		x = int(x);
+		pw = pw[x:] ++ pw[:x]
+	)
+	case "rotate", "right", x, _ -> (
+		x = int(x);
+		pw = pw[-x:] ++ pw[:-x]
+	)
+	case "rotate", "based", _, _, _, _, x -> (
+		i := pw index x;
+		amt := (i + 1 + (i >= 4)) % len(pw);
+		pw = pw[-amt:] ++ pw[:-amt]
+	)
+	case "reverse", _, x, _, y -> (
+		x .= int; y .= int;
+		y += 1;
+		assert(x < y);
+		pw = pw[:x] ++ reverse(pw[x:y]) ++ pw[y:];
+	)
+	case "move", _, x, _, _, y -> (
+		x .= int; y .= int;
+		c := pw[x];
+		pw = pw[:x] ++ pw[x+1:];
+		pw = pw[:y] ++ [c] ++ pw[y:];
+	)
+	case x -> throw x
+);
+submit! 1, pw join "";

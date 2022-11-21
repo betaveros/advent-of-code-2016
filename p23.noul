@@ -1,0 +1,75 @@
+day := 23;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+instrs := lines puzzle_input;
+instrs = instrs map words;
+regfile := {:0};
+regfile["a"] = 12;
+ip := 0;
+
+val := \k -> try int(k) catch _ -> regfile[k];
+
+while (ip < len(instrs)) (
+	if (ip == 4) (
+		assert(regfile["d"] > 0);
+		assert(regfile["b"] > 0);
+		regfile["a"] += regfile["b"] * regfile["d"];
+		regfile["c"] = 0;
+		regfile["d"] = 0;
+		ip = 10;
+	) else
+	# print(ip, instrs[ip]);
+	switch (instrs[ip])
+	case "cpy", a, b -> (
+		if ("a" <= b <= "h") regfile[b] = val(a);
+		ip += 1
+	)
+	case "inc", a -> (
+		if ("a" <= a <= "h") regfile[a] += 1;
+		ip += 1
+	)
+	case "dec", a -> (
+		if ("a" <= a <= "h") regfile[a] -= 1;
+		ip += 1;
+	)
+	case "jnz", a, b -> (
+		if (b == "-2"
+			and instrs[ip-1][0] in ["inc", "dec"]
+			and instrs[ip-2][0] in ["inc", "dec"]
+			and instrs[ip-2][1] != instrs[ip-1][1] == a) (
+			other := instrs[ip-2][1];
+			assert("a" <= other <= "h");
+			assert("a" <= a <= "h");
+			amt := null;
+			if (regfile[a] <= 0 and instrs[ip-1][0] == "inc") (
+				amt = abs! regfile[a];
+				regfile[a] = 0;
+			) else if (regfile[a] >= 0 and instrs[ip-1][0] == "dec") (
+				amt = abs! regfile[a];
+				regfile[a] = 0;
+			) else throw "optimization failed";
+			print(ip, "optimizing", instrs[ip], a, amt);
+			if (instrs[ip-2][0] == "inc") (
+				regfile[other] += amt;
+			) else if (instrs[ip-2][0] == "dec") (
+				regfile[other] -= amt;
+			) else throw "wtf";
+			ip += 1;
+		) else if (val(a)) ip += val(b) else ip += 1
+	)
+	case "tgl", x -> (
+		tgt := ip + val(x);
+		print("toggling", tgt);
+		if (0 <= tgt < len(instrs))
+		instrs[tgt][0] = switch (instrs[tgt][0])
+			case "inc" -> "dec"
+			case "dec" -> "inc"
+			case "tgl" -> (if (4 <= tgt <= 9) throw "broken"; "inc")
+			case "jnz" -> "cpy"
+			case "cpy" -> "jnz";
+		ip += 1;
+	)
+);
+
+submit! 2, regfile["a"]

@@ -1,0 +1,40 @@
+day := 25;
+import "prelude.noul";
+puzzle_input := advent_input();
+
+instrs := lines puzzle_input;
+seems_valid := \a0 -> (
+	regfile := {:0};
+	regfile["a"] = a0;
+	ip := 0;
+
+	val := \k -> try int(k) catch _ -> regfile[k];
+
+	expected := 0;
+	remaining := 50;
+
+	while (ip < len(instrs)) (
+		switch (words (instrs[ip]))
+		case "cpy", a, b -> (regfile[b] = val(a); ip += 1)
+		case "inc", a -> (regfile[a] += 1; ip += 1)
+		case "dec", a -> (regfile[a] -= 1; ip += 1)
+		case "jnz", a, b -> (if (val(a)) ip += val(b) else ip += 1)
+		case "out", a -> (
+			print(val(a), regfile);
+			if (val(a) != expected) return 0;
+			remaining -= 1;
+			expected .= not;
+			if (remaining <= 0) return 1;
+			ip += 1
+		);
+		if (ip == 8) print(ip, a0, regfile);
+	);
+	0
+);
+print("?", seems_valid(198));
+submit! 1, iota(198) find seems_valid
+
+#(
+2532 =  0b100111100100
+        0b101010101010
+)
